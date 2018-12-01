@@ -1,0 +1,41 @@
+{{- if .Values.load_generator.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "loadgen.name" . }}
+  labels:
+    snappyflow/compname: hxstage
+    snappyflow/appname: hxsizer-stage
+    app: {{ template "hyperflexsizer.name" . }}
+    chart: {{ template "hyperflexsizer.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "hyperflexsizer.name" . }}
+      release: {{ .Release.Name }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        snappyflow/compname: hxstage
+        snappyflow/appname: hxsizer-stage
+        app: {{ template "hyperflexsizer.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: load-generator
+      {{- if .Values.image_registry }}
+        image: "{{ .Values.image_registry }}/{{ .Values.load_generator.image }}:{{ .Values.load_generator.imageTag }}"
+      {{ else }}
+        image: "{{ .Values.load_generator.image }}:{{ .Values.load_generator.imageTag }}"
+      {{ end }}
+        env:
+        - name: SIZER_IP
+          value: {{ template "hyperflexsizer.fullname" . }}
+        - name: SIZER_PORT
+          value: "8000"
+{{- end }}

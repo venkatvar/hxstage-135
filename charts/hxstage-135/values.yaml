@@ -1,0 +1,85 @@
+# Default values for hyperflexsizer.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+#image_registry: 10.11.0.217:5000
+image_registry: 34.218.206.182:5000
+replicaCount: 1
+
+image:
+  # if image_registry is defined then, image name will be image_registry/repository
+  repository: maplelabs/sizer
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8000
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - chart-example.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+mysql:
+  mysqlRootPassword: maplelabs
+  mysqlUser: sizer
+  mysqlPassword: maplelabs
+  mysqlDatabase: hypersizer
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: "fast"
+
+
+apache_exporter:
+  enabled: true
+  # if image_registry is defined then, image name will be image_registry/image
+  image: apache_exporter
+  imageTag: v1
+  imagePullPolicy: IfNotPresent
+  resources: {}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9117"
+
+load_generator:
+  enabled: true
+  # if image_registry is defined then, image name will be image_registry/image
+  image: sizer_jmeter
+  imageTag: latest
+  imagePullPolicy: IfNotPresent
+
+logger:
+  enabled: true
+  image: gcr.io/google-containers/fluentd-elasticsearch
+  imageTag: v2.0.4
+  imagePullPolicy: IfNotPresent
+  fluentd_server_host: logger-deepinsights-fluentd.default.svc.cluster.local
+  fluentd_server_port: "24224"
